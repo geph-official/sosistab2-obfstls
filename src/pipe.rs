@@ -31,7 +31,7 @@ impl ObfsTlsPipe {
         peer_metadata: &str,
     ) -> Self {
         let inner = async_dup::Arc::new(async_dup::Mutex::new(inner));
-        let (send_write, recv_write) = smol::channel::bounded(100);
+        let (send_write, recv_write) = smol::channel::bounded(1000);
         let _task = smolscale::spawn(send_loop(recv_write, inner.clone()));
         Self {
             inner,

@@ -39,7 +39,7 @@ impl ObfsTlsListener {
     ) -> std::io::Result<Self> {
         let acceptor = async_native_tls::TlsAcceptor::from(tls_conf);
         let inner = TcpListener::bind(addr).await?;
-        let (send_pipe, recv_pipe) = smol::channel::bounded(100);
+        let (send_pipe, recv_pipe) = smol::channel::bounded(1000);
         let _task = smolscale::spawn(tls_listen_loop(send_pipe, inner, acceptor, cookie));
         Ok(Self { recv_pipe, _task })
     }
