@@ -90,6 +90,8 @@ impl Pipe for ObfsTlsPipe {
     fn send(&self, to_send: Bytes) {
         if to_send.len() < 65536 {
             let _ = self.send_write.try_send(InnerMessage::Normal(to_send));
+        } else {
+            log::error!("message too big")
         }
     }
 
