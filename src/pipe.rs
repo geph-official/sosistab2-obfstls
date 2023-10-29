@@ -53,7 +53,7 @@ impl ObfsTlsPipe {
     ) -> std::io::Result<Self> {
         let connector = async_native_tls::TlsConnector::from(tls_conf_builder);
         let connection = TcpStream::connect(remote_addr).await?;
-        connection.set_nodelay(true)?;
+        connection.set_nodelay(false)?;
         let mut connection = connector
             .connect(tls_hostname, connection)
             .await

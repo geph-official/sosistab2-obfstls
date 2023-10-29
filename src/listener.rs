@@ -58,7 +58,7 @@ async fn tls_listen_loop(
         let cookie = cookie.clone();
         smolscale::spawn(async move {
             let negotiate = async {
-                client.set_nodelay(true)?;
+                client.set_nodelay(false)?;
                 let mut accepted = acceptor.accept(client).await?;
                 log::debug!("accepted a TLS connection");
                 // check that the other side knows about the cookie. we don't need anything fancy if we trust tls
