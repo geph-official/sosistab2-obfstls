@@ -31,7 +31,7 @@ impl ObfsTlsPipe {
         peer_metadata: &str,
     ) -> Self {
         let inner = async_dup::Arc::new(async_dup::Mutex::new(inner));
-        let (send_write, recv_write) = smol::channel::bounded(1000);
+        let (send_write, recv_write) = smol::channel::bounded(100);
         let _task = smolscale::spawn(send_loop(recv_write, inner.clone()));
         Self {
             inner,
@@ -53,7 +53,7 @@ impl ObfsTlsPipe {
     ) -> std::io::Result<Self> {
         let connector = async_native_tls::TlsConnector::from(tls_conf_builder);
         let connection = TcpStream::connect(remote_addr).await?;
-        connection.set_nodelay(false)?;
+        connection.set_nodelay(true)?;
         let mut connection = connector
             .connect(tls_hostname, connection)
             .await
