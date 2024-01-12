@@ -31,7 +31,7 @@ impl ObfsTlsPipe {
         peer_metadata: &str,
     ) -> Self {
         let inner = async_dup::Arc::new(async_dup::Mutex::new(inner));
-        let (send_write, recv_write) = smol::channel::bounded(1000);
+        let (send_write, recv_write) = smol::channel::unbounded();
         let _task = smolscale::spawn(send_loop(recv_write, inner.clone()));
         Self {
             inner,
@@ -89,7 +89,15 @@ async fn send_loop(
 impl Pipe for ObfsTlsPipe {
     fn send(&self, to_send: Bytes) {
         if to_send.len() < 65536 {
-            let _ = self.send_write.try_send(InnerMessage::Normal(to_send));
+            const LOW_THRESHOLD: f64 = 100.;
+            const HIGH_THRESHOLD: f64 = 1000.;
+            let queue_length = self.send_write.len() as f64;
+            // random early drop
+            let fail_probability =
+                (queue_length - LOW_THRESHOLD).max(0.0) / (HIGH_THRESHOLD - LOW_THRESHOLD);
+            if rand::random::<f64>() > fail_probability {
+                let _ = self.send_write.try_send(InnerMessage::Normal(to_send));
+            }
         } else {
             log::error!("message too big")
         }
